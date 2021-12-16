@@ -21,9 +21,6 @@ import rw.ac.rca.termOneExam.domain.City;
 import rw.ac.rca.termOneExam.repository.ICityRepository;
 import rw.ac.rca.termOneExam.service.CityService;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +28,7 @@ import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -111,12 +109,20 @@ public class CityUtilTest {
     }
 
     @Test
-    public void testMocking() {
-        long id = 101;
-        when(cityRepository.findById(id)).thenReturn(Optional.of(new City(101, "Kigali", 20, 0)));
-        double expectedValue = (20 * 1.8) + 32;
-        Assertions.assertEquals(expectedValue, cityService.getById(id).get().getFahrenheit());
+    public void testMocking() throws JsonProcessingException {
+        String jsonStr = this.restTemplate.getForObject("/api/cities/all", String.class);
+        ObjectMapper mapper = new ObjectMapper();
+        City[] jsonObj = mapper.readValue(jsonStr, City[].class);
+        ArrayList<String> allCities = new ArrayList<>();
 
-        verify(cityRepository).findById(id);
+        for (City itr : jsonObj) {
+            allCities.add(itr.getName());
+        }
+
+        List<String> mockList = mock(List.class);
+        mockList.add(allCities.get(0));
+        mockList.size();
+
+        verify(mockList).add(allCities.get(0));
     }
 }
