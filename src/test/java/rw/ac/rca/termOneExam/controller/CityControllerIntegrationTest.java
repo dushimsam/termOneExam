@@ -50,7 +50,7 @@ public class CityControllerIntegrationTest {
         when(cityServiceMock.getAll()).thenReturn(asList);
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
-                .get("/all-items")
+                .get("/api/cities/all")
                 .accept(MediaType.APPLICATION_JSON);
 
         MvcResult result = mockMvc
@@ -66,9 +66,10 @@ public class CityControllerIntegrationTest {
     public void getById_success() throws Exception {
         Optional<City> city = Optional.of(new City(101, "Kigali", 24, 0));
 
+        when(cityServiceMock.getById(city.get().getId())).thenReturn(city);
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
-                .get("/id/" + city.get().getId())
+                .get("/api/cities/id/" + city.get().getId())
                 .accept(MediaType.APPLICATION_JSON);
 
         MvcResult result = mockMvc
@@ -82,17 +83,17 @@ public class CityControllerIntegrationTest {
     @Test
     public void getById_failure() throws Exception {
         Optional<City> city = Optional.ofNullable(null);
-
-        when(cityServiceMock.getById(city.get().getId())).thenReturn(city);
+        long id = 3;
+        when(cityServiceMock.getById(id)).thenReturn(city);
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
-                .get("/id/2")
+                .get("/api/cities/id/" + id)
                 .accept(MediaType.APPLICATION_JSON);
 
         MvcResult result = mockMvc
                 .perform(request)
                 .andExpect(status().isNotFound())
-                .andExpect(content().json("{\"status\":false,\"message\":\"City not found with id 2\"}"))
+                .andExpect(content().json("{\"status\":false,\"message\":\"City not found with id 3\"}"))
                 .andReturn();
 
     }
@@ -113,15 +114,17 @@ public class CityControllerIntegrationTest {
 
         String json = "{\"name\":Kigali,\"weather\":\"24\"}";
 
+        String response_json = "{\"id\":101,\"name\":Kigali,\"weather\":\"24\",\"fahrenheit:\":\"0\"}";
+
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
-                .post("/add")
+                .post("/api/cities/add")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json);
 
         MvcResult result = mockMvc
                 .perform(request)
                 .andExpect(status().isCreated())
-                .andExpect(content().json(json))
+                .andExpect(content().json(response_json))
                 .andReturn();
     }
 
@@ -135,7 +138,7 @@ public class CityControllerIntegrationTest {
         String item_post_json = "{\"name\":Kigali,\"weather\":\"24\"}";
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
-                .post("/add")
+                .post("/api/cities/add")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(item_post_json);
 
